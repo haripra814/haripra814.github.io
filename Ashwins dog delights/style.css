@@ -1,0 +1,25 @@
+#dogImage {
+  width: 80%;
+  max-width: 500px;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  margin: 2rem auto;
+  display: block;
+}
+
+#copyButton {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  margin-top: 1rem;
+}
+
+#copyButton:hover {
+  background-color: #388e3c;
+}
