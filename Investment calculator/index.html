@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Investment Calculator</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+        <style>
+            body {
+                background:
+                url('https://images.unsplash.com/photo-1565372910781-01f3eb600f36?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+                background-size: cover;
+                color: white;
+            }
+
+            .container {
+                background-color: rgba(0, 0, 0, 0.75);
+                padding: 15px;
+                border-radius: 30px;
+                margin-top: 50px;
+            }
+            .form-label {
+                font-weight: bold;
+            }
+            table {
+                background: rgba(225, 225, 225, 0.1);
+                color: white;
+            }
+            /* row fade-in animation */
+            @keyframes fadeIn {
+                0% { opacity: 0; transform: translateY(20px); }
+                100% { opacity: 1; transform: translateY(0); }
+            }
+            .fade-row {
+                opacity: 0;
+                animation: fadeInUp 0.6s ease forwards;
+            }
+            
+        </style>
+    </head>
+    <body>
+
+        <div class="container">
+            <h1 class="text-center mb-4">💰 Investment Calculator</h1>
+            <form id="investmentForm">
+                <div class="mb-3">
+                    <label for="amount" class="form-label">Investment amount</label>
+                    <input type="number" class="form-control" id="amount" 
+                    placeholder="Enter amount" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="years" class="form-label">Number of years</label>
+                    <input type="number" class="form-control" id="years" 
+                    placeholder="Enter number of years" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="type" class="form-label">Investment type</label>
+                    <select class="form-control" id="type" required>
+                        <option value="">-- Select Type -- </option> 
+                        <option value="stocks">Stocks</option>
+                        <option value="bonds">Bonds</option>
+                        <option value="real_estate">Real Estate</option>
+                    </select>
+                </div>
+
+                <button type="button" class="btn btn-success w-100" onclick="calculateProfit()">Calculate Profit</button>
+            </form>
+
+            <div id="results" class="mt-4 text-center fs-4 fw-bold"></div>
+            <div id="breakdown" class="mt-4"></div>
+        </div>
+
+        <!-- Bootstrap Js -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        function animateValue(el, start, end, duration) {
+            let startTime = null;
+            function step(timestamp) {
+                if (!startTime) startTime = timestamp;
+                let progress = Math.min((timestamp - startTime) / duration, 1);
+                let value = start + (end - start) * progress;
+                el.textContent = value.toFixed(2);
+                if (progress < 1)
+                requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+            }
+
+            function updateProgressBarColor(progressBar, percent) {
+  progressBar.classList.remove("bg-danger", "bg-warning", "bg-success");
+
+  if (percent <= 40) {
+    progressBar.classList.add("bg-danger");
+  } else if (percent <= 70) {
+    progressBar.classList.add("bg-warning");
+  } else {
+    progressBar.classList.add("bg-success");
+  }
+}
+
+function calculateProfit() {
+  let amount = parseFloat(document.getElementById("amount").value);
+  let years = parseInt(document.getElementById("years").value);
+  let type = document.getElementById("type").value;
+  let resultBox = document.getElementById("result");
+  let breakdownBox = document.getElementById("breakdown");
+
+  breakdownBox.innerHTML = ""; // clear previous
+
+  // Input validation
+  if (isNaN(amount) || amount <= 0) {
+    resultBox.innerHTML = "❌ Please enter a valid investment amount.";
+    return;
+  } else if (isNaN(years) || years <= 0) {
+    resultBox.innerHTML = "❌ Please enter valid years of investment.";
+    return;
+  } else if (type === "") {
+    resultBox.innerHTML = "❌ Please select an investment type.";
+    return;
+  }
+
+  let rate;
+  switch (type) {
+    case "stocks": rate = 0.08; break;
+    case "bonds": rate = 0.05; break;
+    case "real_estate": rate = 0.07; break;
+    default:
+      resultBox.innerHTML = "Invalid investment type selected.";
+      return;
+  }
+
+  let totalProfit = amount * Math.pow(1 + rate, years) - amount;
+  resultBox.innerHTML = `📈 Expected Profit: $${totalProfit.toFixed(2)}`;
+
+  // Create progress bar
+  let progressHTML = `
+    <div class="progress mb-3">
+      <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+           role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        0%
+      </div>
+    </div>
+  `;
+
+  // Create breakdown table
+  let tableHTML = `
+    <h3 class="text-center mt-4">📊 Yearly Breakdown</h3>
+    ${progressHTML}
+    <table class="table table-bordered table-striped table-dark mt-3">
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>Starting Balance ($)</th>
+          <th>Profit This Year ($)</th>
+          <th>Ending Balance ($)</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  `;
+
+  breakdownBox.innerHTML = tableHTML;
+
+  let balance = amount;
+  let tableBody = document.getElementById("tableBody");
+  let progressBar = document.getElementById("progressBar");
+
+  for (let i = 1; i <= years; i++) {
+    let profitYear = balance * rate;
+    let endBalance = balance + profitYear;
+
+    let row = document.createElement("tr");
+    row.classList.add("fade-row");
+    row.style.animationDelay = `${i * 0.3}s`;
+
+    let yearCell = document.createElement("td");
+    yearCell.textContent = i;
+
+    let startCell = document.createElement("td");
+    let profitCell = document.createElement("td");
+    let endCell = document.createElement("td");
+
+    startCell.textContent = "0.00";
+    profitCell.textContent = "0.00";
+    endCell.textContent = "0.00";
+
+    setTimeout(() => {
+      animateValue(startCell, 0, balance, 800);
+      animateValue(profitCell, 0, profitYear, 800);
+      animateValue(endCell, 0, endBalance, 800);
+
+      // Update progress bar
+      let progressPercent = Math.round((i / years) * 100);
+      progressBar.style.width = progressPercent + "%";
+      progressBar.setAttribute("aria-valuenow", progressPercent);
+      progressBar.textContent = progressPercent + "%";
+
+      // Change progress bar color dynamically
+      updateProgressBarColor(progressBar, progressPercent);
+    }, i * 300);
+
+    row.appendChild(yearCell);
+    row.appendChild(startCell);
+    row.appendChild(profitCell);
+    row.appendChild(endCell);
+
+    tableBody.appendChild(row);
+    balance = endBalance;
+  }
+}
+</script>
+</body>
+</html>
+    
+    </body>
+</html>
